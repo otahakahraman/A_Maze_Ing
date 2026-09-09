@@ -1,0 +1,120 @@
+import random
+BIT={"N": 1, "E": 2, "S": 4, "W": 8}
+OPPOSITE={"N":"S", "E":"W", "W":"E", "S":"N"}
+DX_DY={"N":(0,-1), "S":(0,1), "E":(1,0), "W":(-1,0)}
+
+class MazeGenerator:
+    def __init__(self ,height :int ,width :int,seed :int) -> None:
+        self.height=height
+        self.width=width
+        self.grid: list[list[int]]=[ [0xF for _ in range(width)] for _ in range( height)]
+        self.rng=random.Random(seed)
+        self.visited : list[list[bool]] = [False for _ in range(width) for _ in range (height)]
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# import random
+
+
+# BIT = {"N": 1, "E": 2, "S": 4, "W": 8}
+# OPPOSITE = {"N": "S", "E": "W", "S": "N", "W": "E"}
+# DX_DY = {"N": (0, -1), "E": (1, 0), "S": (0, 1), "W": (-1, 0)}
+
+
+# class MazeGenerator:
+#     def __init__(self, width: int, height: int, seed: int | None = None) -> None:
+#         self.width = width
+#         self.height = height
+#         # Her hücre başlangıçta 0xF: tüm duvarlar kapalı
+#         self.grid: list[list[int]] = [
+#             [0xF for _ in range(width)] for _ in range(height)
+#         ]
+#         self.visited: list[list[bool]] = [
+#             [False for _ in range(width)] for _ in range(height)
+#         ]
+#         # seed verilirse random.seed() ile aynı labirent tekrar üretilebilir
+#         self.rng = random.Random(seed)
+
+#     def get_neighbors(self, x: int, y: int) -> list[tuple[str, int, int]]:
+#         """Grid sınırları içindeki tüm komşuları döndürür."""
+#         neighbors = []
+#         for direction, (dx, dy) in DX_DY.items():
+#             nx, ny = x + dx, y + dy
+#             if 0 <= nx < self.width and 0 <= ny < self.height:
+#                 neighbors.append((direction, nx, ny))
+#         return neighbors
+
+#     def remove_wall(
+#         self, x1: int, y1: int, direction: str, x2: int, y2: int
+#     ) -> None:
+#         """İki komşu hücre arasındaki duvarı kaldırır (her iki tarafı da günceller)."""
+#         self.grid[y1][x1] &= ~BIT[direction]
+#         self.grid[y2][x2] &= ~BIT[OPPOSITE[direction]]
+
+#     def carve_from(self, x: int, y: int) -> None:
+#         """Recursive Backtracker: (x, y)'den başlayıp tüm ulaşılabilir
+#         hücreleri gezerek bir spanning tree (perfect maze) oluşturur.
+#         """
+#         self.visited[y][x] = True
+
+#         # Komşuları al, ziyaret edilmemiş olanları filtrele
+#         neighbors = self.get_neighbors(x, y)
+#         unvisited = [
+#             (d, nx, ny) for d, nx, ny in neighbors if not self.visited[ny][nx]
+#         ]
+
+#         # Sıralarını karıştır — labirentin her seferinde farklı çıkmasını sağlar
+#         self.rng.shuffle(unvisited)
+
+#         for direction, nx, ny in unvisited:
+#             # shuffle sonrası bir önceki adımda bu komşu ziyaret edilmiş olabilir
+#             # (başka bir dal üzerinden ulaşılmış olabilir), tekrar kontrol şart
+#             if self.visited[ny][nx]:
+#                 continue
+
+#             self.remove_wall(x, y, direction, nx, ny)
+#             self.carve_from(nx, ny)   # <-- recursive çağrı: yeni hücreden devam et
+#             # bu satırdan sonrasına geldiğimizde, nx,ny'nin tüm dalları bitmiş
+#             # demektir -> otomatik olarak "geri dönmüş" oluyoruz (backtrack)
+
+
+# # --- Kullanım örneği ---
+# maze = MazeGenerator(width=3, height=3, seed=42)
+# maze.carve_from(0, 0)   # (0,0)'dan başlayarak tüm labirenti oluştur
+
+# for row in maze.grid:
+#     print(" ".join(format(cell, "x") for cell in row))
