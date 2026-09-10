@@ -4,13 +4,75 @@ OPPOSITE={"N":"S", "E":"W", "W":"E", "S":"N"}
 DX_DY={"N":(0,-1), "S":(0,1), "E":(1,0), "W":(-1,0)}
 
 class MazeGenerator:
-    def __init__(self ,height :int ,width :int,seed :int) -> None:
+    def __init__(self ,width :int ,height :int,seed :int) -> None:
         self.height=height
         self.width=width
-        self.grid: list[list[int]]=[ [0xF for _ in range(width)] for _ in range( height)]
+        self.grid: list[list[int]]=[[0xF for _ in range(width)] for _ in range( height)]
         self.rng=random.Random(seed)
-        self.visited : list[list[bool]] = [False for _ in range(width) for _ in range (height)]
+        self.visited : list[list[bool]] = [[False for _ in range(width)] for _ in range (height)]
 
+    def get_neighbours(self,x1:int ,y1:int):
+        res=[]
+        for direction,(dx,dy)in DX_DY.items():
+            nx,ny=x1+dx,y1+dy
+            if ((0<=nx <=self.width-1) and (0<=ny <=self.height-1) and not self.visited[ny][nx]):
+                res.append((nx,ny))
+        return res
+
+    def get_open_neighbours(self,x1:int ,y1:int):
+        res=[]
+        for direction,(dx,dy) in DX_DY.items():
+            nx,ny=x1+dx,y1+dy
+            if ((0<=nx<=self.width-1 and 0<=ny<=self.height-1) and ((self.grid[y1][x1]& BIT[direction])==0)):
+                res.append((nx,ny))
+        return res
+        
+
+    def find_direction(self,x1 : int, y1: int , x2 : int, y2: int):
+        dx,dy=x2-x1,y2-y1
+        for direction,(ddx,ddy) in DX_DY.items():
+            if(ddx,ddy)==(dx,dy):
+                return direction
+        raise ValueError(f"({x1},{y1}) ile ({x2},{y2}) komsu degil")
+
+    def carve(self ,x1 : int, y1: int , x2 : int, y2: int):
+        direction=self.find_direction(x1,y1,x2,y2)
+        opposite=OPPOSITE[direction]
+
+        self.grid[y1][x1]&= ~BIT[direction]
+        self.grid[y2][x2]&= ~BIT[opposite]
+
+    def generator(self,x: int, y: int):
+        stack:list[tuple[int,int]]=[(x,y)]
+        self.visited[y][x]=True
+        while(stack):
+            cx,cy=stack[-1]
+            neigh=self.get_neighbours(cx,cy)
+
+            if(neigh):
+                xn,yn=self.rng.choice(neigh)
+                self.carve(cx,cy,xn,yn)
+                self.visited[yn][xn]=True
+                stack.append((xn,yn))
+            else:
+                stack.pop()
+        
+    def find_short_path(self,entry:tuple[int,int],uscite:tuple[int,int]):
+        from collections import deque
+
+
+
+if __name__=="__main__":
+    gen=MazeGenerator(4,4,41)
+    for i in gen.grid:
+        print(i)
+
+    gen.generator(0,0)
+    for i in gen.grid:
+            print(i)
+    
+
+        
     
 
 
@@ -48,6 +110,11 @@ class MazeGenerator:
 
 
 # import random
+
+
+
+
+
 
 
 # BIT = {"N": 1, "E": 2, "S": 4, "W": 8}
