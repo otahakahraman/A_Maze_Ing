@@ -1,5 +1,10 @@
 import random
 from collections import deque
+PATTERN_42 :list[list[int]]= [ [1,0,1,1,1,1,1],
+                               [1,0,1,1,2,0,1],
+                               [1,1,1,1,1,1,1], 
+                               [0,0,1,1,1,0,0],
+                               [0,0,1,1,1,1,1]]
 
 BIT={"N": 1, "E": 2, "S": 4, "W": 8}
 OPPOSITE={"N":"S", "E":"W", "W":"E", "S":"N"}
@@ -13,7 +18,9 @@ class MazeGenerator:
         self.rng=random.Random(seed)
         self.visited : list[list[bool]] = [[False for _ in range(width)] for _ in range (height)]
 
-    def get_neighbours(self,x1:int ,y1:int):#bulunduğu noktanın her komşusunu yazar
+
+    def get_neighbours(self,x1:int ,y1:int) -> list[tuple[int,int]]:
+        """Bulunduğu hücre ile komşu olan ve visit edilmemiş olan hücreleri döndürür."""
         res=[]
         for direction,(dx,dy)in DX_DY.items():
             nx,ny=x1+dx,y1+dy
@@ -21,29 +28,43 @@ class MazeGenerator:
                 res.append((nx,ny))
         return res
 
-    def get_open_neighbours(self,x1:int ,y1:int):#bulunduğu noktanın gidilebilecek(duvar olmayan) komşusunu yazar
+    def get_open_neighbours(self,x1:int ,y1:int) -> list[tuple[int,int]]:
+        """Bulunduğu hücre ile komşu hücre arasındaki duvarın açık olduğu komşuları döndürür."""
         res=[]
         for direction,(dx,dy) in DX_DY.items():
             nx,ny=x1+dx,y1+dy
             if ((0<=nx<=self.width-1 and 0<=ny<=self.height-1) and ((self.grid[y1][x1]& BIT[direction])==0)):
                 res.append((nx,ny))
         return res
+    
+    def get_all_neighbours(self,x:int ,y:int) -> list[tuple[int,int]]:
+        """Bulunduğu hücre ile komşu olan tüm hücreleri döndürür."""
+        res=[]
+        for direction,(dx,dy)in DX_DY.items():
+            nx,ny=x+dx,y+dy
+            if ((0<=nx <=self.width-1) and (0<=ny <=self.height-1)):
+                res.append((nx,ny))
+        return res
 
-    def find_direction(self,x1 : int, y1: int , x2 : int, y2: int):#bulunduğu noktanın, senin verdiğin noktanın neresinde olduğunu yazar
+    def find_direction(self,x1 : int, y1: int , x2 : int, y2: int) -> str:
+        """Bulunduğu hücre ile komşu hücre arasındaki yönü döndürür. (N, S, E, W)"""
         dx,dy=x2-x1,y2-y1
         for direction,(ddx,ddy) in DX_DY.items():
             if(ddx,ddy)==(dx,dy):
                 return direction
         raise ValueError(f"({x1},{y1}) ile ({x2},{y2}) komsu degil")
 
-    def carve(self ,x1 : int, y1: int , x2 : int, y2: int):#labirenti deler
+    def carve(self ,x1 : int, y1: int , x2 : int, y2: int) -> None:
+        """Labirentteki iki hücre arasındaki duvarı kaldırır ve böylece bir geçit oluşturur."""
         direction=self.find_direction(x1,y1,x2,y2)
         opposite=OPPOSITE[direction]
 
         self.grid[y1][x1]&= ~BIT[direction]
         self.grid[y2][x2]&= ~BIT[opposite]
 
-    def generator(self,x: int, y: int,perfect: bool):#yukardaki fonksiyonların çalışmasını sağlar
+    def generator(self,x: int, y: int,perfect: bool) -> None:
+        """fonksiyonların çalışmasını sağlar"""
+        self.apply_pattern()
         stack:list[tuple[int,int]]=[(x,y)]
         self.visited[y][x]=True
         while(stack):
@@ -58,6 +79,8 @@ class MazeGenerator:
                 else:
                     stack.pop()
         if not perfect :
+            self.carve(0,0,1,0)
+            self.carve(0,0,0,1)
             try_again=self.width*self.height//2
             for _ in range (try_again):
                 x1=self.rng.randrange(self.width)
@@ -66,32 +89,39 @@ class MazeGenerator:
                 opposite=OPPOSITE[direct]
                 x2=x1+DX_DY[direct][0]
                 y2=y1+DX_DY[direct][1]
-                if not(0<=x2<self.width and 0<=y2<self.height ):
+                if not(
+                    0 <= x2 < self.width
+                    and 0 <= y2 < self.height
+                    and not self.visited[y1][x1]
+                    and not self.visited[y2][x2]
+                ):
                     continue
-                if (self.grid[y1][x1]&BIT[direct]):
+                elif (self.grid[y1][x1]&BIT[direct]):
                     self.grid[y1][x1]&= ~BIT[direct]
                     self.grid[y2][x2]&= ~BIT[opposite]
             self.count_open_neigh_and_carve()
-    def get_all_neighbours(self,x:int ,y:int):
-        res=[]
-        for direction,(dx,dy)in DX_DY.items():
-            nx,ny=x+dx,y+dy
-            if ((0<=nx <=self.width-1) and (0<=ny <=self.height-1)):
-                res.append((nx,ny))
-        return res
+            
 
-    def count_open_neigh_and_carve(self):
+
+    def count_open_neigh_and_carve(self) -> None:
+        """Labirentteki köşe hücreleri bulur ve rastgele bir komşu ile duvarı kaldırır. Bu işlem, labirentin daha karmaşık ve ilginç hale gelmesini sağlar."""
         corner_list:list[tuple[int,int]]=[]
         for y in range(self.height):
             for x in range(self.width):
+                if self.grid[y][x] == 0xF:
+                    continue
                 count=len(self.get_open_neighbours(x,y))
-                if count<2:
+                if count<2 :
                     corner_list.append((x,y))
 
         while (len(corner_list)>2):
             cx,cy=self.rng.choice(corner_list)
             neigh=set(self.get_all_neighbours(cx,cy))
-            n_neight=neigh-set(self.get_open_neighbours(cx,cy))
+            n_neight={
+                neighbour
+                for neighbour in neigh
+                if not self.visited[neighbour[1]][neighbour[0]]
+            }
             if not n_neight:
                 corner_list.remove((cx, cy))
                 continue
@@ -101,10 +131,8 @@ class MazeGenerator:
             self.carve(cx,cy,ccx,ccy)
             corner_list.remove((cx,cy))
 
-
-
-    
-    def find_short_path(self,entry:tuple[int,int],uscite:tuple[int,int]) -> str:#çözüm için en kısa yolu bulur
+    def find_short_path(self,entry:tuple[int,int],uscite:tuple[int,int]) -> str:
+        """Labirentteki en kısa çözüm yolunu bulur."""
         queue=deque([entry])  
         visited_bfs={entry}
         came_from:dict[tuple[int,int],tuple[int,int]]={}
@@ -119,6 +147,8 @@ class MazeGenerator:
                     came_from[neighbor]=current
                     queue.append(neighbor)
         current=uscite
+        if uscite not in visited_bfs:
+            raise ValueError("Giriş ile çıkış arasında açık bir yol yok")
         road=""   
 
         while(current!=entry):
@@ -128,8 +158,51 @@ class MazeGenerator:
             road=self.find_direction(sx,sy,dx,dy) +road
             current=before
         return road
-    
-    def write_to_file(self, output_file: str, entry:tuple[int,int], uscite:tuple[int,int]):#labirenti, giriş çıkışı ve çözüm yolunu verdiğin isimdeki dosyaya yazar
+
+    def apply_pattern(self) -> None:
+        """Labirent üzerine '42' desenini uygular."""
+        pattern_height=len(PATTERN_42)
+        pattern_width=len(PATTERN_42[0])
+        if(self.width<pattern_width or self.height<pattern_height ):
+            print("Grid '42' desenine sigacak kadar buyuk degil, desen atlaniyor.")
+            return
+        offset_y=(self.height-pattern_height)//2
+        offset_x=(self.width-pattern_width)//2
+
+        for py in range(pattern_height):
+            for px in range(pattern_width):
+                if PATTERN_42[py][px] ==1:
+                    gx=offset_x+px
+                    gy=offset_y+py
+                    self.grid[gy][gx]=0xF
+                    self.visited[gy][gx]=True
+                if PATTERN_42[py][px] ==2:
+                    gx=offset_x+px
+                    gy=offset_y+py
+                    self.carve(gx,gy,gx+1,gy)
+                    self.visited[gy][gx]=True
+                    self.visited[gy][gx+1]=True
+
+
+
+            
+    def add_wall(self,x1:int,y1:int,x2:int,y2:int) -> None:
+        """Labirentteki iki hücre arasına duvar ekler."""
+        direction=self.find_direction(x1,y1,x2,y2)
+        opposite=OPPOSITE[direction]
+        self.grid[y1][x1]|= BIT[direction]
+        self.grid[y2][x2]|= BIT[opposite]
+
+    def fix_opens(self) -> None:
+        """3x3'lük boş olan alanı bulur ve doğu ve kuzeyine duvar koyar."""
+        for py in range(self.height-1):
+            for px in range(self.width-1):
+                if(self.grid[py][px]==0):
+                    self.add_wall(px,py,px,py+1)
+                    self.add_wall(px,py,px+1,py)
+
+    def write_to_file(self, output_file: str, entry:tuple[int,int], uscite:tuple[int,int]) -> None:
+        """Labirenti ve çözüm yolunu belirtilen dosyaya yazar."""
         with open(output_file,"w") as f:
             for row in self.grid:
                 line="".join(f"{cell:x}" for cell in row)
@@ -139,15 +212,16 @@ class MazeGenerator:
             f.write(self.find_short_path(entry,uscite))
             f.write("\n") 
 
-
-if __name__=="__main__":
-    gen=MazeGenerator(4,4,2)
-    for i in gen.grid:
-        print(i)
-
-    gen.generator(0,0,False)
-    for i in gen.grid:
-            print(i)
-    gen.write_to_file("a.txt",(0,0),(3,3))
-
-
+    def control(self,entry:tuple[int,int] , uscite:tuple[int,int]) -> None:
+        """Giriş ve çıkış koordinatlarının geçerliliğini kontrol eder."""
+        if entry == uscite:
+            raise ValueError("Giriş ve çıkış aynı olamaz")
+        entry_x=entry[0]
+        entry_y=entry[1]
+        uscite_x=uscite[0]
+        uscite_y=uscite[1]
+        if(0>entry_x or entry_x>=self.width or 0>entry_y or entry_y>=self.height):
+            raise ValueError("Giriş koordinatları geçersiz")
+        if(0>uscite_x or uscite_x>=self.width or 0>uscite_y or uscite_y>=self.height):
+            raise ValueError("Çıkış koordinatları geçersiz")
+            

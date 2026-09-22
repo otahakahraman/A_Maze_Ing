@@ -19,12 +19,12 @@ Labirenti ürettirip önce dosyaya yazacak, ardından ekranda canlı görselleş
 
 import sys #argümanlarını sys.ergv okumakv ve hatalı durumlarda programı sonlandırmak için sys.exit için standart python kütüphanesini içe aktarır
 from config_parser import parse_config #farklı dosyalardaki kodları çağrıyorum
-from generator import generate_maze 
+from maze_generator.generator import  MazeGenerator
 from output_writer import write_maze_to_file
 from visualizer import interactive_loop, path_to_coordinates
 
 def main() -> None:
-    if len(sys,argv) < 2: # terminalden girilen komutu liste olarak tutar (len(...))
+    if len(sys.argv) < 2: # terminalden girilen komutu liste olarak tutar (len(...))
         print("Hata: Lütfen bir yapılandırma dosyası belirtin.")
         print("Kullanım: python3 a_maze_ing.py <config_dosyasi>")
         sys.exit(1)
@@ -39,17 +39,19 @@ def main() -> None:
         sys.exit(1) # hatalı bir çıkış olduğunu belirtir 0 doğru olandır 1 genel hata 2 argüman 3 girdi yapılandırma hatası
 
 # 3. Labirenti ve çözüm yolunu üret
-    grid, path_str = generate_maze(config)
-
+    maze = MazeGenerator(config.width, config.height, config.seed)
+    maze.generator(config.entry[0], config.entry[1], config.perfect)
+    grid = maze.grid
+    path_str = maze.find_short_path(config.entry, config.exit_coord)
     
     # 4. Labirenti ve çözümü dosyaya yaz (Subject gereksinimi: maze.txt)
     output_filename = "maze.txt"
     write_maze_to_file(
+        file_path=output_filename,
         grid=grid,
         entry=config.entry,
         exit_coord=config.exit_coord,
-        path_str=path_str,
-        filename=output_filename,
+        path=path_str
     )
     print(f"Labirent başarıyla '{output_filename}' dosyasına kaydedildi.")
 

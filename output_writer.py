@@ -10,15 +10,6 @@ Etiketli: def topla(a: int, b: int) -> int:
 
 (Girişler tamsayı (int) olmalı, sonuç da tamsayı (int) dönecektir.)"""
 
-def write_maze_to_file(
-        file_path: str,#dosyanın nereye kaydedileceği 
-        grid: List[List[int]], #labirentin haritası. Hücrelerin sayı matrisi halidir
-        entry:Tuple[int, int],# başlangıç noktasının kordinatı
-        exit_coord: Tuple[int, int], # bitiş noktasının kordinatı
-        path; str, # başlangıçtan bitişe giden en kısa yolun harf dizisi eesswwn gibi
-
-
-) -> None:
 
 #bu yukardaki fonksiyonun amacı hafızadaki labirenti kağıda dökmek maze.txt ye dökmek 
 
@@ -34,24 +25,25 @@ def write_maze_to_file(
 
 
 
-"""Output writer module for exporting generated mazes.
-
+"""
+Output writer module for exporting generated mazes.
 This module formats the maze grid into hexadecimal lines and appends
 the entry, exit, and shortest path solution according to 42 subject rules.
+
 """
 
-from typing import List, Tuple
+
 
 
 def write_maze_to_file(
-    file_path: str,
-    grid: List[List[int]],
-    entry: Tuple[int, int],
-    exit_coord: Tuple[int, int],
-    path: str,
-) -> None:
+        file_path: str,#dosyanın nereye kaydedileceği 
+        grid: List[List[int]], #labirentin haritası. Hücrelerin sayı matrisi halidir
+        entry:Tuple[int, int],# başlangıç noktasının kordinatı
+        exit_coord: Tuple[int, int], # bitiş noktasının kordinatı
+        path: str, # başlangıçtan bitişe giden en kısa yolun harf dizisi eesswwn gibi
+                        ) -> None:
 
-with open(file_path, "w",encoding = " utf-8 ") as f: #açılan dosyayı kod içinde temsil eden geçici bir taka addır değişkendir 
+    with open(file_path, "w",encoding = " utf-8 ") as f: #açılan dosyayı kod içinde temsil eden geçici bir taka addır değişkendir 
 #file path dosyanın nerde olduğunu ve adını söyler 
 # w yazma modu ve ayrıca yoksa açılmasını varsa içindekileri silip tertemiz baştan da yazan o
 # encoding="utf-8" Dosyaya yazılan harflerin hangi evrensel dil/karakter standardıyla kaydedileceğini belirler. Farklı işletim sistemlerinde (Mac, Linux, Windows) Türkçe karakterlerin veya özel sembollerin bozulmadan, garip şekillere (Ã§, Ä±) dönüşmeden düzgün okunmasını sağlar.

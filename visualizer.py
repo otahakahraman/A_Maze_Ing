@@ -153,7 +153,7 @@ def render_maze(
 # join metodu listede sırası ile belirttiğiniz metinleri ayraç (burdaki \n) ile ayırmakdır
 
 """
-aşşağıdaki kodun amacı terminal üzerinden labirentle etkileşime 
+Aşağıdaki kodun amacı terminal üzerinden labirentle etkileşime 
 girmesini sağlar
 Sonsuz bir döngü kurarak ekranı temizler
 labirenti güncel ayarlarla ekrana basar ve kullanıcıdan gelen komutlara göre 
@@ -184,8 +184,7 @@ def interactive_loop( #etkileşimli döngü
             grid=grid, #seçilen renk yolun açık/kapalı olması vb tek bir metin haline getirir
             entry=entry, #terminale yazdırır ve kullanıcının basabileceği tuşları ekranda gösterir
             exit_coord=exit_coord,
-            path_coord=path_coord,
-            path_coords=path_coords,
+            path_coord=path_coords,
             show_path=show_path,
             wall_color=current_color,
         )
