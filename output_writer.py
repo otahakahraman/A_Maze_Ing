@@ -43,7 +43,7 @@ def write_maze_to_file(
         path: str, # başlangıçtan bitişe giden en kısa yolun harf dizisi eesswwn gibi
                         ) -> None:
 
-    with open(file_path, "w",encoding = " utf-8 ") as f: #açılan dosyayı kod içinde temsil eden geçici bir taka addır değişkendir 
+    with open(file_path, "w",encoding = "utf-8") as f: #açılan dosyayı kod içinde temsil eden geçici bir taka addır değişkendir 
 #file path dosyanın nerde olduğunu ve adını söyler 
 # w yazma modu ve ayrıca yoksa açılmasını varsa içindekileri silip tertemiz baştan da yazan o
 # encoding="utf-8" Dosyaya yazılan harflerin hangi evrensel dil/karakter standardıyla kaydedileceğini belirler. Farklı işletim sistemlerinde (Mac, Linux, Windows) Türkçe karakterlerin veya özel sembollerin bozulmadan, garip şekillere (Ã§, Ä±) dönüşmeden düzgün okunmasını sağlar.
