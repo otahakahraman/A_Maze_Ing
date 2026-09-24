@@ -34,7 +34,7 @@ def generate_maze(config_path: str) -> tuple:
     grid = maze.grid
     path_str = maze.find_short_path(config.entry, config.exit_coord)
 
-    output_filename = "maze.txt"
+    output_filename = config.output_file
     write_maze_to_file(
         file_path=output_filename,
         grid=grid,
@@ -63,7 +63,7 @@ def main() -> None:
         print(f"Yapılandırma Hatası: {exc}")
         sys.exit(1)
 
-    print(f"Labirent başarıyla 'maze.txt' dosyasına kaydedildi.")
+    print(f"Labirent başarıyla '{config.output_file}' dosyasına kaydedildi.")
 
     if not args.no_visualize:
         interactive_loop(
